@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <style>
+      /* Input Color on Focus */
+      #searchBox:focus {
+        border-bottom: 1px solid #2196f3;
+        box-shadow: 0 1px 0 0 #2196f3;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 12px;
+        position: relative;
+      }
+      th {
+        background-color: #2196f3;
+        color: white;
+        cursor: pointer;
+      }
+      .copy-button,
+      .sort-icon {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+      }
+      .copy-button {
+        right: 5px;
+        font-size: 18px;
+      }
+      .sort-icon {
+        right: 20px;
+        font-size: 20px;
+      }
+      #searchBox {
+        margin-top: 20px;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body class="container">
+    <input type="text" id="searchBox" class="validate" placeholder="Search by Currency" oninput="searchTable()" />
+
+    <table id="exchangeRatesTable" class="highlight">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">Record ID<span class="sort-icon">&#x2195;</span></th>
+          <th onclick="sortTable(1)">Date<span class="sort-icon">&#x2195;</span></th>
+          <th onclick="sortTable(2)">Currency<span class="sort-icon">&#x2195;</span></th>
+          <th onclick="sortTable(3)">Exchange Rate<span class="sort-icon">&#x2195;</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be dynamically added here -->
+      </tbody>
+    </table>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        M.AutoInit(); // Initialize Materialize components
+      });
+
+      // Show Tost Function
+      function showToast(message) {
+        if (shouldShowToast) {
+          M.toast({ html: message, displayLength: 1000 });
+        }
+      }
+      var data = [
+        {
+          datasetid: "euro-exchange-rates",
+          recordid: "43f5940bfd6881b2f8e0c434a3a96f229a8a1054",
+          fields: {
+            date: "2022-03-06",
+            currency: "USD",
+            rate: 1.0929,
+          },
+        },
+        {
+          datasetid: "euro-exchange-rates",
+          recordid: "1787f87bcf029a223e001d6f88750fe0ca6772d1",
+          fields: {
+            date: "2022-03-06",
+            currency: "AUD",
+            rate: 1.4872,
+          },
+        },
+        {
+          datasetid: "euro-exchange-rates",
+          recordid: "756f0f685431156ad1d3bc24b91d574c5a6f00fa",
+          fields: {
+            date: "2022-03-06",
+            currency: "CAD",
+            rate: 1.3937,
+          },
+        },
+        {
+          datasetid: "euro-exchange-rates",
+          recordid: "58e15a0abb6fc40d08a10ae0f58fc2c9525b267a",
+          fields: {
+            date: "2022-03-06",
+            currency: "GBP",
+            rate: 0.8238800000000001,
+          },
+        },
+        {
+          datasetid: "euro-exchange-rates",
+          recordid: "4f7879e2c8e97bc11ae065f748a2e13f2cd73c71",
+          fields: {
+            date: "2022-03-06",
+            currency: "SEK",
+            rate: 10.7935,
+          },
+        },
+        {
+          datasetid: "euro-exchange-rates",
+          recordid: "e3f948548d1479dff8b10aeaaf0c247e17b70897",
+          fields: {
+            date: "2022-03-06",
+            currency: "MXN",
+            rate: 22.7543,
+          },
+        },
+      ];
+
+      var sortDirections = [1, 1, 1, 1]; // Initial sort directions for each column
+      var clearLastCopiedTimeout;
+      var lastCopiedValue = "";
+      var shouldShowToast = true;
+
+      function populateTable() {
+        var tableBody = document.getElementById("exchangeRatesTable").getElementsByTagName("tbody")[0];
+
+        data.forEach(function (entry) {
+          var row = tableBody.insertRow(tableBody.rows.length);
+
+          var recordIdCell = row.insertCell(0);
+          var dateCell = row.insertCell(1);
+          var currencyCell = row.insertCell(2);
+          var rateCell = row.insertCell(3);
+
+          recordIdCell.textContent = entry.recordid;
+          dateCell.textContent = entry.fields.date;
+          currencyCell.textContent = entry.fields.currency;
+          rateCell.textContent = parseFloat(entry.fields.rate.toFixed(2));
+
+          // Add copy button to each cell
+          addCopyButton(recordIdCell);
+          addCopyButton(dateCell);
+          addCopyButton(currencyCell);
+          addCopyButton(rateCell);
+        });
+      }
+
+      function addCopyButton(cell) {
+        var button = document.createElement("i");
+        button.className = "material-icons copy-button";
+        button.textContent = "content_copy";
+        button.addEventListener("click", function () {
+          copyToClipboard(cell);
+        });
+        cell.appendChild(button);
+      }
+
+      function copyToClipboard(cell) {
+        let textToCopy = cell.innerText.replace("content_copy", "");
+
+        let tempTextarea = document.createElement("textarea");
+        tempTextarea.value = textToCopy;
+        document.body.appendChild(tempTextarea);
+
+        tempTextarea.select();
+        document.execCommand("copy");
+
+        document.body.removeChild(tempTextarea);
+
+        if (textToCopy !== lastCopiedValue) {
+          showToast("Copied to clipboard: " + textToCopy);
+          lastCopiedValue = textToCopy;
+        }
+      }
+
+      function sortTable(columnIndex) {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("exchangeRatesTable");
+        switching = true;
+
+        // Reset sort icons
+        var sortIcons = document.querySelectorAll(".sort-icon");
+        sortIcons.forEach((icon) => (icon.innerHTML = "&#x2195;"));
+
+        while (switching) {
+          switching = false;
+          rows = table.rows;
+
+          for (i = 1; i < rows.length - 1; i++) {
+            shouldSwitch = false;
+
+            x = rows[i].getElementsByTagName("td")[columnIndex];
+            y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+            if (
+              sortDirections[columnIndex] === 1
+                ? x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()
+                : x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()
+            ) {
+              shouldSwitch = true;
+              break;
+            }
+          }
+
+          if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+          }
+        }
+
+        // Toggle sort icon and direction
+        var sortIcon = document.querySelectorAll(".sort-icon")[columnIndex];
+        sortIcon.innerHTML = sortDirections[columnIndex] === 1 ? "&#x2191;" : "&#x2193;";
+        sortDirections[columnIndex] = 1 - sortDirections[columnIndex];
+      }
+
+      function searchTable() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchBox");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("exchangeRatesTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 1; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td")[2]; // Index 2 represents the Currency column
+
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
+            }
+          }
+        }
+      }
+
+      // Call the function to populate the table
+      populateTable();
+    </script>
+  </body>
+</html>

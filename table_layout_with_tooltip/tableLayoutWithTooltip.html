@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      .table-container {
+        padding: 5%;
+        box-sizing: border-box;
+        overflow: hidden;
+        background-color: #d401f0;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .row {
+        display: flex;
+        margin-bottom: 5%;
+      }
+
+      .cell {
+        flex: 1;
+        border: 1px solid #ffffff;
+        padding: 3%;
+        position: relative;
+        box-sizing: border-box;
+        margin-right: 5%;
+      }
+
+      .sit-in-the-corner {
+        float: left;
+        margin-left: -5%;
+        margin-top: -5%;
+        color: white;
+      }
+
+      .tooltip {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin-top: -5%;
+        margin-right: -5%;
+        background-color: #333;
+        border: 1px solid #555;
+        padding: 1%;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="table-container"></div>
+
+    <script>
+      function createTable(rows, cols) {
+        var tableContainer = document.querySelector(".table-container");
+        var rowCount = 0;
+
+        for (var i = 1; i <= rows; i++) {
+          var row = document.createElement("div");
+          row.className = "row";
+          if (i !== 1) {
+            rowCount++;
+          }
+
+          for (var j = 1; j <= cols; j++) {
+            var cell = document.createElement("div");
+            cell.className = "cell";
+            if (i === 1) {
+              cell.innerHTML = "<span class='sit-in-the-corner'>Header " + ((i - 1) * cols + j) + "</span>";
+            } else {
+              cell.innerHTML = "<span class='sit-in-the-corner'>Row " + rowCount + "</span>";
+            }
+
+            var tooltip = document.createElement("div");
+            tooltip.className = "tooltip";
+            tooltip.textContent = "Tooltip " + ((i - 1) * cols + j);
+
+            cell.appendChild(tooltip);
+            row.appendChild(cell);
+          }
+
+          tableContainer.appendChild(row);
+        }
+      }
+      createTable(4, 3);
+    </script>
+  </body>
+</html>
